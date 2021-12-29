@@ -9,6 +9,7 @@ library(sf)
 library(tidyverse)
 library(leaflet)
 library(raster)
+library(ggspatial)
 
 # get/set workspace -----------------------------------------------------------
 getwd()
@@ -21,8 +22,6 @@ tw.counties.df <-  tw.counties.sf #copy sf
 st_geometry(tw.counties.df) <- NULL #set geom to NULL to get dataframe
 
 # get tw outline ----------------------------------------------------------
-tw = getData('GADM', country='TW', level=0) 
-tw <- st_as_sf(tw)
 tw.boundry = getData('GADM', country='TW', level=0) %>%
   st_as_sf() %>%
   st_cast("POLYGON") %>%
@@ -37,10 +36,21 @@ tw.boundry <- st_transform(tw.boundry,crs = 3824)
 # crop in on tw and remove islands-----------------------------------------------------------
 tw.main.counties.sf <- st_intersection(tw.counties.sf,tw.boundry)
 
-# make a plot -------------------------------------------------------------
-ggplot(data=tw)+
-  geom_sf()+
-  theme_bw()
-st_bbox(tw.counties.sf.croped)
+# make county selection ---------------------------------------------------
+county <- c("A","F","C")
+tw.county.select <- filter(tw.main.counties.sf,COUNTYID%in%county)
+tw.county.nonselect <- filter(tw.main.counties.sf,COUNTYID!=county)
 
+# make a plot -------------------------------------------------------------
+ggplot()+
+  geom_sf(data=tw.county.nonselect, colour="white", size=.05, fill="#95cfc7")+
+  geom_sf(data=tw.county.select,  size=0,  fill="#23b09d")+
+  theme(panel.grid = element_blank(),
+           axis.title = element_blank(),
+           axis.text = element_blank(),
+            axis.ticks= element_blank(),
+        panel.background = element_blank()
+           )
+
+  ?annotation_north_arrow
 
