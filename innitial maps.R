@@ -41,6 +41,26 @@ county <- c("A","F","C")
 tw.county.select <- filter(tw.main.counties.sf,COUNTYID%in%county)
 tw.county.nonselect <- filter(tw.main.counties.sf,COUNTYID!=county)
 
+# add grouping variable ---------------------------------------------------
+#make a df with only county names of the main island
+countynames <- tw.main.counties.sf
+st_geometry(countynames) <- NULL 
+countynames <- countynames[,c(1,4)]
+
+#define north,south, east and west (N,S,E&W)
+N <- c("A,F,C,G")
+S <- 
+E <- 
+W <- 
+
+tw.grouped <- tw.main.counties.sf
+
+
+test$GROUP[test$COUNTYID%in%c("E","T")] <- "S"
+
+head(test[20,])
+
+
 # make a plot -------------------------------------------------------------
 ggplot()+
   geom_sf(data=tw.county.nonselect, colour="white", size=.05, fill="#95cfc7")+
@@ -51,6 +71,4 @@ ggplot()+
             axis.ticks= element_blank(),
         panel.background = element_blank()
            )
-
-  ?annotation_north_arrow
 
