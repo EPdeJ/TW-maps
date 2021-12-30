@@ -17,10 +17,6 @@ getwd()
 # load shapefile ----------------------------------------------------------
 tw.counties.sf <- st_read("GIS/twshape/mapdata202008310842/COUNTY_MOI_1090820.shp") #load the downloaded counties as sf
 
-# make df without geom ----------------------------------------------------
-tw.counties.df <-  tw.counties.sf #copy sf
-st_geometry(tw.counties.df) <- NULL #set geom to NULL to get dataframe
-
 # get tw outline ----------------------------------------------------------
 tw.boundry = getData('GADM', country='TW', level=0) %>%
   st_as_sf() %>%
@@ -36,10 +32,7 @@ tw.boundry <- st_transform(tw.boundry,crs = 3824)
 # crop in on tw and remove islands-----------------------------------------------------------
 tw.main.counties.sf <- st_intersection(tw.counties.sf,tw.boundry)
 
-# make county selection ---------------------------------------------------
-county <- c("A","F","C")
-tw.county.select <- filter(tw.main.counties.sf,COUNTYID%in%county)
-tw.county.nonselect <- filter(tw.main.counties.sf,COUNTYID!=county)
+
 
 # add grouping variable ---------------------------------------------------
 #make a df with only county names of the main island
@@ -48,27 +41,55 @@ st_geometry(countynames) <- NULL
 countynames <- countynames[,c(1,4)]
 
 #define north,south, east and west (N,S,E&W)
-N <- c("A,F,C,G")
-S <- 
-E <- 
-W <- 
+#north
+N <- c("Yilan County",
+        "Keelung City",
+        "Taipei City", 
+        "New Taipei City",
+       "Taoyuan City",
+       "Hsinchu City",
+       "Hsinchu County"
+              )
+#south
+S <- c("Tainan City",
+       "Kaohsiung City",
+       "Taitung County",
+       "Pingtung County" 
+       )
+#east
+E <- c("Nantou County",
+       "Hualien County")
+#west
+W <- c("Yunlin County",
+       "Taichung City",
+       "Miaoli County",
+       "Chiayi City",
+       "Chiayi County",
+       "Changhua County"
+       )
 
 tw.grouped <- tw.main.counties.sf
-
-
-test$GROUP[test$COUNTYID%in%c("E","T")] <- "S"
-
-head(test[20,])
+tw.grouped$GROUP[tw.grouped$COUNTYENG%in%N] <- "N"
+tw.grouped$GROUP[tw.grouped$COUNTYENG%in%S] <- "S"
+tw.grouped$GROUP[tw.grouped$COUNTYENG%in%E] <- "E"
+tw.grouped$GROUP[tw.grouped$COUNTYENG%in%W] <- "W"
+rm(E,W,S,N)
 
 
 # make a plot -------------------------------------------------------------
-ggplot()+
-  geom_sf(data=tw.county.nonselect, colour="white", size=.05, fill="#95cfc7")+
-  geom_sf(data=tw.county.select,  size=0,  fill="#23b09d")+
-  theme(panel.grid = element_blank(),
-           axis.title = element_blank(),
-           axis.text = element_blank(),
-            axis.ticks= element_blank(),
-        panel.background = element_blank()
-           )
+twmap <- function(region="N"){
+            print(
+            ggplot()+
+              geom_sf(data=subset(tw.grouped, GROUP!=region), colour="white", size=.05, fill="#95cfc7")+
+              geom_sf(data=subset(tw.grouped, GROUP==region),  size=0,  fill="#23b09d")+
+              theme(panel.grid = element_blank(),
+                       axis.title = element_blank(),
+                       axis.text = element_blank(),
+                        axis.ticks= element_blank(),
+                    panel.background = element_blank()
+                    )
+            )
+            }
+
+twmap("S")
 
