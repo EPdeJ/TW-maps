@@ -69,15 +69,18 @@ W <- c("Yunlin County",
        )
 
 tw.grouped <- tw.main.counties.sf
-tw.grouped$GROUP[tw.grouped$COUNTYENG%in%N] <- "N"
-tw.grouped$GROUP[tw.grouped$COUNTYENG%in%S] <- "S"
-tw.grouped$GROUP[tw.grouped$COUNTYENG%in%E] <- "E"
-tw.grouped$GROUP[tw.grouped$COUNTYENG%in%W] <- "W"
+tw.grouped$GROUP[tw.grouped$COUNTYENG%in%N] <- "North Taiwan"
+tw.grouped$GROUP[tw.grouped$COUNTYENG%in%S] <- "South Taiwan"
+tw.grouped$GROUP[tw.grouped$COUNTYENG%in%E] <- "East Taiwan"
+tw.grouped$GROUP[tw.grouped$COUNTYENG%in%W] <- "West Taiwan"
 rm(E,W,S,N)
 
+tw.grouped$GROUP <- as.factor(tw.grouped$GROUP)
+levels(tw.grouped$GROUP) <- list('North Taiwan'="N", 'South Taiwan'="S", 'West Taiwan'="W",'East Taiwan'="E")
+levels(tw.grouped$GROUP)
 
 # make a plot -------------------------------------------------------------
-twmap <- function(region="N"){
+twmap <- function(region){
             print(
             ggplot()+
               geom_sf(data=subset(tw.grouped, GROUP!=region), colour="white", size=.05, fill="#95cfc7")+
@@ -86,10 +89,19 @@ twmap <- function(region="N"){
                        axis.title = element_blank(),
                        axis.text = element_blank(),
                         axis.ticks= element_blank(),
-                    panel.background = element_blank()
+                    panel.background = element_rect(fill = "transparent"), 
+                    plot.background = element_rect(fill = "transparent", color = NA)
                     )
             )
             }
 
-twmap("S")
+# make a loop -------------------------------------------------------------
+twmap("North Taiwan")
+
+
+
+for (i in levels(tw.grouped$GROUP)){
+  twmap(region=i)
+  ggsave(paste0(i,"_plot.png"), bg = "transparent")
+ }
 
