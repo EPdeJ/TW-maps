@@ -10,6 +10,8 @@ library(tidyverse)
 library(leaflet)
 library(raster)
 library(ggspatial)
+library(Cairo) #for PNG24
+
 
 # get/set workspace -----------------------------------------------------------
 getwd()
@@ -77,23 +79,22 @@ rm(E,W,S,N)
 
 tw.grouped$GROUP <- as.factor(tw.grouped$GROUP)
 levels(tw.grouped$GROUP) <- list('North Taiwan'="N", 'South Taiwan'="S", 'West Taiwan'="W",'East Taiwan'="E")
-levels(tw.grouped$GROUP)
+
 
 # make a plot -------------------------------------------------------------
 twmap <- function(region){
-            print(
-            ggplot()+
+              ggplot()+
               geom_sf(data=subset(tw.grouped, GROUP!=region), colour="white", size=.05, fill="#95cfc7")+
-              geom_sf(data=subset(tw.grouped, GROUP==region),  colour="white", size=0,  fill="#23b09d")+
-              theme(panel.grid = element_blank(),
-                       axis.title = element_blank(),
-                       axis.text = element_blank(),
+              geom_sf(data=subset(tw.grouped, GROUP==region),  colour="white", size=.05,  fill="#23b09d")+
+              theme(panel.grid.minor = element_blank(), 
+                        panel.grid.major = element_blank(),
+                        axis.title = element_blank(),
+                        axis.text = element_blank(),
                         axis.ticks= element_blank(),
-                    panel.background = element_rect(fill = "transparent"), 
-                    plot.background = element_rect(fill = "transparent", color = NA)
+                        panel.background = element_rect(fill = "transparent",color = NA), 
+                        plot.background = element_rect(fill = "transparent", color = NA)
                     )
-            )
-            }
+              }
 
 # make a loop -------------------------------------------------------------
 twmap("North Taiwan")
@@ -102,6 +103,25 @@ twmap("North Taiwan")
 
 for (i in levels(tw.grouped$GROUP)){
   twmap(region=i)
-  ggsave(paste0(i,"_plot.png"), bg = "transparent")
+  ggsave(paste0(i,"_plot.png"), type = "cairo-png", bg = "transparent")
  }
 
+# add gpx -----------------------------------------------------------------
+file_name <- "gpx/Route1_Coffee_road_.gpx"
+st_layers(file_name)
+gpx <- st_read(file_name,layer="track_points")
+
+  ggplot()+
+    geom_sf(data=subset(tw.grouped, GROUP!="South Taiwan"), colour="white", size=.05, fill="#95cfc7")+
+    geom_sf(data=subset(tw.grouped, GROUP=="South Taiwan"),  colour="white", size=.05,  fill="#23b09d")+
+    geom_sf(data=gpx, colour="red")+
+    theme(panel.grid.minor = element_blank(), 
+          panel.grid.major = element_blank(),
+          axis.title = element_blank(),
+          axis.text = element_blank(),
+          axis.ticks= element_blank(),
+          panel.background = element_rect(fill = "transparent",color = NA), 
+          plot.background = element_rect(fill = "transparent", color = NA)
+    )
+gpx
+summary(gpx)
