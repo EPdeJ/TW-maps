@@ -81,7 +81,7 @@ twmap <- function(region="N"){
             print(
             ggplot()+
               geom_sf(data=subset(tw.grouped, GROUP!=region), colour="white", size=.05, fill="#95cfc7")+
-              geom_sf(data=subset(tw.grouped, GROUP==region),  size=0,  fill="#23b09d")+
+              geom_sf(data=subset(tw.grouped, GROUP==region),  colour="white", size=0,  fill="#23b09d")+
               theme(panel.grid = element_blank(),
                        axis.title = element_blank(),
                        axis.text = element_blank(),
